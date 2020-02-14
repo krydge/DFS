@@ -50,35 +50,38 @@ def depthFirstSearch(g, visitOrder=None):
             the strongly connected components of g and are in reverse
             topological order.
     """
-    if visitOrder==None:
-        visitOrder==reverseGraph(g)
+    NumNodes= numNodes(g)
+    if visitOrder is None:
+        visitOrder=[]
+        for node in depthFirstSearch(reverseGraph(g),range(NumNodes)):
+            visitOrder.append(node.nodeID)
     
     counter = 0
     clock = 0
-    nodes = list(visitOrder() for _ in range(len(g)))
+    nodes = list(NodeInfo(ID) for ID in range(NumNodes))
     result = []
+    visited= [False] * NumNodes
 
     def explore(i:int):
         nonlocal clock
-        nodes[i].isVisited=True
+        visited[i]=True
         nodes[i].connectedComponentID= counter
         nodes[i].preClock = clock
         clock += 1
-
-        for neighborIndex in g[i]:
-            if not nodes[neighborIndex].isVisited:
-                explore(neighborIndex)
+        #g at i is a list of out neighbors
+        if i<len(g):
+            for neighborIndex in g[i]:
+                if not visited[neighborIndex]:
+                    explore(neighborIndex)
         nodes[i].postClock = clock
         clock += 1
         result.append(nodes[i])
             
-    for i in range(len(g)):
-        if not nodes[i].isVisited:
+    for i in visitOrder:
+        if not visited[i]:
             explore(i)
             counter+=1
 
     result.reverse()
     
-
-    n = numNodes(g)
-    return list(NodeInfo(id) for id in range(n))
+    return result
